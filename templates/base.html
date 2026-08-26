@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} Document {% endblock %}</title>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div id="navbar">
+                <a href="{{url_for('index')}}">Home</a>
+                {% if 'user_id' in session %}
+                <a href="#">Projects</a>
+                <a href="#">Taks</a>
+                <a href="#">Profile ({{ session['username'] }})</a>
+                <a href="{{url_for('auth.logout')}}">Logout</a>
+                {% endif %}
+            </div>
+        </nav>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div>
+            {% for message in messages %}
+            <div>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </header>
+    <main>
+        <div id="content">{% block content %} {% endblock %}</div>
+    </main>
+    <footer>
+        <div id="footer">
+            <p>&copy; Copyright 2030 by Alien</p>
+        </div>
+    </footer>
+</body>
+
+</html>
