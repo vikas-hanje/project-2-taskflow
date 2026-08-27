@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}
+projects
+{% endblock %}
+
+{% block content %}
+<h3>My Projects</h3>
+
+<div>
+    <h4>Create New Project</h4>
+    <form action="{{url_for('project.index')}}" method="POST">
+        <label for="project_name">Project Name</label>
+        <input type="text" name="name" id="name" required>
+        <input type="submit" name="submit" value="Create">
+    </form>
+</div>
+
+<h4>Existing Projects</h4>
+
+{% if projects %}
+<ul>
+    {% for project in projects %}
+    <li>
+        <strong>{{project.name}}</strong>
+        <p>Created: {{project.created_at}}</p>
+        <a href="/projects/{{project.project_id}}/tasks">View Tasks</a>
+        <br>
+        <br>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>You have not yet created any project.</p>
+{% endif %}
+{% endblock %}

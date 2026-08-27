@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %} Document {% endblock %}</title>
+    <title>{% block title %} Base {% endblock %}</title>
 </head>
 
 <body>
@@ -13,7 +13,7 @@
             <div id="navbar">
                 <a href="{{url_for('index')}}">Home</a>
                 {% if 'user_id' in session %}
-                <a href="#">Projects</a>
+                <a href="{{url_for('project.index')}}">Projects</a>
                 <a href="#">Taks</a>
                 <a href="#">Profile ({{ session['username'] }})</a>
                 <a href="{{url_for('auth.logout')}}">Logout</a>
