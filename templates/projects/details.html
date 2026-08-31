@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+details
+{% endblock %}
+
+{% block content %}
+<h3>Project Details</h3>
+
+<div>
+    <h4>{{project.name}}</h4>
+    <div>
+        <a href="{{ url_for('project.edit', project_id=project.project_id) }}">Edit Project</a>
+        <a href="{{ url_for('project.index') }}">Back to List</a>
+    </div>
+</div>
+
+<div>
+    <h4>Tasks</h4>
+    <p><em>Coming soon...</em></p>
+</div>
+{% endblock %}

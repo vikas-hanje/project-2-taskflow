@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, abort
 from db import connect_DB
 import uuid
 from utils import logged_in
@@ -48,3 +48,98 @@ def index():
         conn.close()
         
     return render_template('projects/list.html', projects=user_projects)
+
+# project details
+@project_bp.route('/<string:project_id>')
+@logged_in
+def details(project_id):
+    user_id = session['user_id']
+    
+    conn = connect_DB()
+    cursor = conn.cursor(dictionary=True)
+    
+    try:
+        cursor.execute("select * from projects where project_id = %s and user_id = %s", (project_id, user_id))
+        project = cursor.fetchone()
+        
+        # if does not exist or belongs to other
+        if not project:
+            abort(404)
+            
+    finally:
+        cursor.close()
+        conn.close()
+        
+    return render_template('projects/details.html', project=project)
+
+@project_bp.route('/<string:project_id>/edit', methods=['GET', 'POST'])
+@logged_in
+def edit(project_id):
+    user_id = session['user_id']
+    
+    if request.method == 'POST':
+        new_name = request.form.get('name')
+        
+        if not new_name:
+            flash("New name cannot be empty.")
+            return redirect(url_for('project.edit', project_id=project_id))
+        
+        # FIX: connect_DB -> connect_DB() -- was assigning the function itself, not calling it
+        conn = connect_DB()
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("select * from projects where project_id = %s and user_id = %s", (project_id, user_id))
+            exists = cursor.fetchone()
+            
+            if not exists:
+                abort(404)
+            
+            cursor.execute("update projects set name = %s where project_id = %s and user_id = %s", (new_name, project_id, user_id))
+            conn.commit()
+                
+            flash("Project details updated successfully.")
+            return redirect(url_for('project.details', project_id=project_id))
+        
+        finally:
+            cursor.close()
+            conn.close()
+            
+    # GET req: fetch project details to pre-fill the form
+    conn = connect_DB()
+    cursor = conn.cursor(dictionary=True)
+    
+    try:
+        cursor.execute("select * from projects where project_id = %s and user_id = %s", (project_id, user_id))
+        project = cursor.fetchone()
+        
+        if not project:
+            abort(404)
+            
+    finally:
+        cursor.close()
+        conn.close()
+    return render_template('projects/edit.html', project=project)
+
+@project_bp.route('/<string:project_id>/delete', methods=['POST'])
+@logged_in
+def delete(project_id):
+    user_id = session['user_id']
+    
+    conn = connect_DB()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("delete from projects where project_id = %s and user_id = %s", (project_id, user_id))
+        conn.commit()
+        
+        # if row_count = 0
+        if cursor.rowcount == 0:
+            abort(404)
+            
+        flash("Project deleted successfully.")
+    finally:
+        cursor.close()
+        conn.close()
+    
+    return redirect(url_for('project.index'))
