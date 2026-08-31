@@ -62,15 +62,17 @@ def details(project_id):
         cursor.execute("select * from projects where project_id = %s and user_id = %s", (project_id, user_id))
         project = cursor.fetchone()
         
-        # if does not exist or belongs to other
         if not project:
             abort(404)
+        
+        cursor.execute("select * from tasks where project_id = %s order by created_at desc", (project_id,))
+        tasks = cursor.fetchall()
             
     finally:
         cursor.close()
         conn.close()
         
-    return render_template('projects/details.html', project=project)
+    return render_template('projects/details.html', project=project, tasks=tasks)
 
 @project_bp.route('/<string:project_id>/edit', methods=['GET', 'POST'])
 @logged_in
@@ -84,7 +86,6 @@ def edit(project_id):
             flash("New name cannot be empty.")
             return redirect(url_for('project.edit', project_id=project_id))
         
-        # FIX: connect_DB -> connect_DB() -- was assigning the function itself, not calling it
         conn = connect_DB()
         cursor = conn.cursor()
         

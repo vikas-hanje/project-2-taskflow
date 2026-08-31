@@ -14,7 +14,6 @@
                 <a href="{{url_for('index')}}">Home</a>
                 {% if 'user_id' in session %}
                 <a href="{{url_for('project.index')}}">Projects</a>
-                <a href="#">Taks</a>
                 <a href="#">Profile ({{ session['username'] }})</a>
                 <a href="{{url_for('auth.logout')}}">Logout</a>
                 {% endif %}

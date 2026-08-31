@@ -16,7 +16,51 @@ details
 </div>
 
 <div>
+    <h4>Add Task</h4>
+    <form method="POST" action="{{ url_for('task.index', project_id=project.project_id) }}">
+        <label>Task Title</label><br>
+        <input type="text" name="title" required><br><br>
+
+        <label>Status</label><br>
+        <select name="status">
+            <option value="To Do">To Do</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+        </select><br><br>
+
+        <label>Priority</label><br>
+        <select name="priority">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+        </select><br><br>
+
+        <label>Due Date</label><br>
+        <input type="date" name="due_date"><br><br>
+
+        <input type="submit" value="Add Task">
+    </form>
+</div>
+
+<div>
     <h4>Tasks</h4>
-    <p><em>Coming soon...</em></p>
+    {% if tasks %}
+    <ul>
+        {% for task in tasks %}
+        <li>
+            <strong>{{ task.title }}</strong>
+            <p>{{ task.status }}</p>
+            <p>{{ task.due_date }}</p>
+            <a href="{{ url_for('task.edit', project_id=project.project_id, task_id=task.task_id) }}">Edit</a>
+            <form method="POST" action="{{ url_for('task.delete', project_id=project.project_id, task_id=task.task_id) }}"
+                style="display: inline;" onsubmit="return confirm('Delete this task?');">
+                <input type="submit" name="submit" id="submit" value="Delete">
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p><em>No tasks yet.</em></p>
+    {% endif %}
 </div>
 {% endblock %}
