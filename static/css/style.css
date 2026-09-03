@@ -1,0 +1,302 @@
+/* ---------- Design tokens ---------- */
+:root {
+    --bg: #F2F0EA;
+    --surface: #FAF9F5;
+    --text: #2B2A28;
+    --text-muted: #6B6660;
+    --border: #DDD8CC;
+    --accent: #A6572E;
+    --accent-hover: #8A4726;
+    --danger: #8C3B33;
+    --danger-hover: #732F29;
+}
+
+/* ---------- Base ---------- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+    color: var(--text);
+}
+
+p {
+    margin: 0 0 0.75rem;
+}
+
+a {
+    color: var(--accent);
+}
+
+/* ---------- Nav ---------- */
+#navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.brand {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.nav-links a:hover {
+    color: var(--accent);
+}
+
+/* ---------- Flash messages ---------- */
+.flash-container {
+    padding: 0.75rem 1.5rem 0;
+}
+
+.flash-message {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 0.6rem 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* ---------- Page layout ---------- */
+.container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+/* ---------- Cards ---------- */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.auth-card {
+    max-width: 380px;
+    margin: 2rem auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2rem;
+}
+
+.auth-switch {
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+/* ---------- Forms ---------- */
+form label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0.75rem 0 0.25rem;
+    color: var(--text-muted);
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="date"],
+form input[type="number"],
+form select {
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+form input:focus,
+form select:focus {
+    outline: 1px solid var(--accent);
+    border-color: var(--accent);
+}
+
+/* ---------- Buttons ---------- */
+.btn,
+input[type="submit"],
+button[type="submit"] {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--surface);
+    border: 1px solid var(--accent);
+    padding: 0.55rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 0.9rem;
+    text-decoration: none;
+}
+
+.btn:hover,
+input[type="submit"]:hover,
+button[type="submit"]:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--bg);
+    border-color: var(--text-muted);
+}
+
+.btn-danger,
+input.btn-danger[type="submit"] {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: var(--surface);
+}
+
+.btn-danger:hover {
+    background: var(--danger-hover);
+    border-color: var(--danger-hover);
+}
+
+/* ---------- Item lists (projects, tasks) ---------- */
+.item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.item-info strong {
+    display: block;
+    font-size: 1rem;
+}
+
+.meta {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0.25rem 0 0;
+}
+
+.badge {
+    display: inline-block;
+    border: 1px solid var(--border);
+    padding: 0.1rem 0.5rem;
+    font-size: 0.75rem;
+    margin-right: 0.4rem;
+    color: var(--text-muted);
+}
+
+.item-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.item-actions form {
+    margin: 0;
+}
+
+.item-actions .btn,
+.item-actions input[type="submit"] {
+    margin-top: 0;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.85rem;
+}
+
+.empty-state {
+    color: var(--text-muted);
+}
+
+/* ---------- Footer ---------- */
+#footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 600px) {
+    .container {
+        padding: 1.25rem 1rem;
+    }
+
+    #navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    .item-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .item-actions {
+        width: 100%;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .auth-card {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+}

@@ -56,8 +56,6 @@ def index():
 def details(project_id):
     user_id = session['user_id']
     
-    # CHANGED: ownership check now goes through the shared get_owned_project() helper
-    # instead of a raw SELECT written out here
     project = get_owned_project(project_id, user_id)
     
     if not project:
@@ -89,8 +87,6 @@ def edit(project_id):
             flash("New name cannot be empty.")
             return redirect(url_for('project.edit', project_id=project_id))
         
-        # CHANGED: replaced the manual "select ... where project_id = %s and user_id = %s"
-        # existence check with the shared helper
         if not get_owned_project(project_id, user_id):
             abort(404)
         
@@ -107,11 +103,7 @@ def edit(project_id):
         finally:
             cursor.close()
             conn.close()
-            
-    # GET req: fetch project details to pre-fill the form
-    # CHANGED: this replaces the raw SELECT entirely -- get_owned_project both verifies
-    # ownership AND returns the row needed to pre-fill the form, so no separate query
-    # is needed here at all anymore
+
     project = get_owned_project(project_id, user_id)
     
     if not project:
@@ -124,12 +116,7 @@ def edit(project_id):
 @logged_in
 def delete(project_id):
     user_id = session['user_id']
-    
-    # NOTE: left as-is deliberately -- this single DELETE already combines the
-    # ownership check and the action into one atomic query (WHERE ... AND user_id = %s),
-    # which is more efficient than calling get_owned_project() first and issuing a
-    # second query. DELETE doesn't have the "matched but unchanged" ambiguity UPDATE
-    # has, so rowcount == 0 here reliably means "didn't exist or wasn't yours."
+
     conn = connect_DB()
     cursor = conn.cursor()
     

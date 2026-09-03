@@ -124,11 +124,6 @@ def update_project(current_user_id, project_id):
 @api_bp.route('/projects/<string:project_id>', methods=['DELETE'])
 @token_required
 def delete_project(current_user_id, project_id):
-    # CHANGED: ownership check + delete combined into one atomic query, matching
-    # the pattern already used by delete_task's Layer 2 check and by the HTML
-    # project.delete() route. Avoids a separate get_owned_project() call (and the
-    # extra DB connection it opens), and removes the small gap between "verify"
-    # and "act" that exists when they're two separate round-trips.
     conn = connect_DB()
     cursor = conn.cursor()
     try:
@@ -231,16 +226,6 @@ def update_task(current_user_id, project_id, task_id):
     conn = connect_DB()
     cursor = conn.cursor(dictionary=True)
     try:
-        # FIX: fetch the existing task first, for two reasons:
-        # 1. Existence (Layer 2) is now proven BEFORE the UPDATE runs, so we no longer
-        #    rely on rowcount == 0 afterward -- which was ambiguous (a real, owned task
-        #    with no actual data changes also reports rowcount 0, and would have been
-        #    incorrectly reported as "not found").
-        # 2. status/priority are NOT NULL columns. data.get(...) returns None for any
-        #    field the client's JSON body omits (a legitimate partial update). Without
-        #    a fallback, that None would get written straight into a NOT NULL column
-        #    and MySQL would reject the query outright, crashing this route with an
-        #    unhandled 500 instead of a clean response.
         cursor.execute("SELECT * FROM tasks WHERE task_id = %s AND project_id = %s", (task_id, project_id))
         existing_task = cursor.fetchone()
 

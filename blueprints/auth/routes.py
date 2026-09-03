@@ -28,9 +28,6 @@ def register():
                 flash("Email already registered! Please log in.")
                 return redirect(url_for('auth.login'))
             
-            # BUG FIX: was querying "where email = %s" with the username value --
-            # that column/value mismatch meant this check never actually matched anything,
-            # so duplicate usernames were silently allowed through.
             cursor.execute("select * from users where username = %s", (username,))
             existing_user = cursor.fetchone()
             
