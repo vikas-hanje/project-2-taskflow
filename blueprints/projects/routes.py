@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, abort
-from db import connect_DB
+from db import connect_DB, get_owned_project
 import uuid
 from utils import logged_in
 
@@ -49,22 +49,24 @@ def index():
         
     return render_template('projects/list.html', projects=user_projects)
 
+
 # project details
 @project_bp.route('/<string:project_id>')
 @logged_in
 def details(project_id):
     user_id = session['user_id']
     
+    # CHANGED: ownership check now goes through the shared get_owned_project() helper
+    # instead of a raw SELECT written out here
+    project = get_owned_project(project_id, user_id)
+    
+    if not project:
+        abort(404)
+    
     conn = connect_DB()
     cursor = conn.cursor(dictionary=True)
     
     try:
-        cursor.execute("select * from projects where project_id = %s and user_id = %s", (project_id, user_id))
-        project = cursor.fetchone()
-        
-        if not project:
-            abort(404)
-        
         cursor.execute("select * from tasks where project_id = %s order by created_at desc", (project_id,))
         tasks = cursor.fetchall()
             
@@ -73,6 +75,7 @@ def details(project_id):
         conn.close()
         
     return render_template('projects/details.html', project=project, tasks=tasks)
+
 
 @project_bp.route('/<string:project_id>/edit', methods=['GET', 'POST'])
 @logged_in
@@ -86,16 +89,15 @@ def edit(project_id):
             flash("New name cannot be empty.")
             return redirect(url_for('project.edit', project_id=project_id))
         
+        # CHANGED: replaced the manual "select ... where project_id = %s and user_id = %s"
+        # existence check with the shared helper
+        if not get_owned_project(project_id, user_id):
+            abort(404)
+        
         conn = connect_DB()
         cursor = conn.cursor()
         
         try:
-            cursor.execute("select * from projects where project_id = %s and user_id = %s", (project_id, user_id))
-            exists = cursor.fetchone()
-            
-            if not exists:
-                abort(404)
-            
             cursor.execute("update projects set name = %s where project_id = %s and user_id = %s", (new_name, project_id, user_id))
             conn.commit()
                 
@@ -107,26 +109,27 @@ def edit(project_id):
             conn.close()
             
     # GET req: fetch project details to pre-fill the form
-    conn = connect_DB()
-    cursor = conn.cursor(dictionary=True)
+    # CHANGED: this replaces the raw SELECT entirely -- get_owned_project both verifies
+    # ownership AND returns the row needed to pre-fill the form, so no separate query
+    # is needed here at all anymore
+    project = get_owned_project(project_id, user_id)
     
-    try:
-        cursor.execute("select * from projects where project_id = %s and user_id = %s", (project_id, user_id))
-        project = cursor.fetchone()
+    if not project:
+        abort(404)
         
-        if not project:
-            abort(404)
-            
-    finally:
-        cursor.close()
-        conn.close()
     return render_template('projects/edit.html', project=project)
+
 
 @project_bp.route('/<string:project_id>/delete', methods=['POST'])
 @logged_in
 def delete(project_id):
     user_id = session['user_id']
     
+    # NOTE: left as-is deliberately -- this single DELETE already combines the
+    # ownership check and the action into one atomic query (WHERE ... AND user_id = %s),
+    # which is more efficient than calling get_owned_project() first and issuing a
+    # second query. DELETE doesn't have the "matched but unchanged" ambiguity UPDATE
+    # has, so rowcount == 0 here reliably means "didn't exist or wasn't yours."
     conn = connect_DB()
     cursor = conn.cursor()
     
@@ -134,7 +137,6 @@ def delete(project_id):
         cursor.execute("delete from projects where project_id = %s and user_id = %s", (project_id, user_id))
         conn.commit()
         
-        # if row_count = 0
         if cursor.rowcount == 0:
             abort(404)
             

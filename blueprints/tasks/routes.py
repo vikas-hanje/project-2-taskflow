@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, abort
 import uuid
-from db import connect_DB
+from db import connect_DB, get_owned_project
 from utils import logged_in
 
 tasks_bp = Blueprint('task', __name__)
@@ -10,27 +10,25 @@ tasks_bp = Blueprint('task', __name__)
 def index(project_id):
     user_id = session['user_id']
     
+    # CHANGED: project-ownership check now via the shared helper instead of a raw SELECT
+    if not get_owned_project(project_id, user_id):
+        abort(404)
+    
+    title = request.form.get('title')
+    status = request.form.get('status')
+    priority = request.form.get('priority')
+    due_date = request.form.get('due_date') or None
+    
+    if not title:
+        flash("Task title is required.")
+        return redirect(url_for('project.details', project_id=project_id))
+    
+    task_id = str(uuid.uuid4())
+    
     conn = connect_DB()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
     
     try:
-        cursor.execute("select * from projects where project_id = %s and user_id = %s", (project_id, user_id))
-        project = cursor.fetchone()
-        
-        if not project:
-            abort(404)
-            
-        title = request.form.get('title')
-        status = request.form.get('status')
-        priority = request.form.get('priority')
-        due_date = request.form.get('due_date') or None
-        
-        if not title:
-            flash("Task title is required.")
-            return redirect(url_for('project.details', project_id=project_id))
-        
-        task_id = str(uuid.uuid4())
-        
         cursor.execute(
             "insert into tasks (task_id, project_id, title, status, priority, due_date) values (%s, %s, %s, %s, %s, %s)",
             (task_id, project_id, title, status, priority, due_date)
@@ -50,14 +48,18 @@ def index(project_id):
 @logged_in
 def edit(project_id, task_id):
     user_id = session['user_id']
+    
+    # CHANGED: Layer 1 (project ownership) now via the shared helper
+    if not get_owned_project(project_id, user_id):
+        abort(404)
+    
     conn = connect_DB()
-    cursor = conn.cursor(dictionary=True)  # FIX: added dictionary=True
+    cursor = conn.cursor(dictionary=True)
     
     try:
-        cursor.execute("SELECT project_id FROM projects WHERE project_id = %s AND user_id = %s", (project_id, user_id))
-        if not cursor.fetchone():
-            abort(404)
-
+        # Layer 2 stays as its own query here -- get_owned_project only knows about
+        # projects, and this route specifically needs the *task* row itself (not just
+        # confirmation it exists) so the edit form can be pre-filled with its current values.
         cursor.execute("SELECT * FROM tasks WHERE task_id = %s AND project_id = %s", (task_id, project_id))
         task = cursor.fetchone()
         if not task:
@@ -73,7 +75,6 @@ def edit(project_id, task_id):
                 flash("Task title is required.")
                 return redirect(url_for('task.edit', project_id=project_id, task_id=task_id))
             
-            # FIX: "task_is" -> "task_id" -- SQL column-name typo, threw a DB error on every save
             cursor.execute(
                 "update tasks set title = %s, status = %s, priority = %s, due_date = %s where task_id = %s and project_id = %s",
                 (title, status, priority, due_date, task_id, project_id)
@@ -95,20 +96,23 @@ def edit(project_id, task_id):
 def delete(project_id, task_id):
     user_id = session['user_id']
     
+    # CHANGED: Layer 1 (project ownership) via the shared helper
+    if not get_owned_project(project_id, user_id):
+        abort(404)
+    
     conn = connect_DB()
     cursor = conn.cursor()
     
     try:
-        cursor.execute("SELECT project_id FROM projects WHERE project_id = %s AND user_id = %s", (project_id, user_id))
-        if not cursor.fetchone():
-            abort(404)
-
-        cursor.execute("SELECT * FROM tasks WHERE task_id = %s AND project_id = %s", (task_id, project_id))
-        if not cursor.fetchone():
-            abort(404)
-        
+        # CHANGED: Layer 2 (task belongs to this project) is now combined directly into
+        # the DELETE's WHERE clause instead of a separate existence-check SELECT beforehand --
+        # same reasoning as project delete() above. rowcount == 0 reliably means the task
+        # either doesn't exist or doesn't belong to this project.
         cursor.execute("DELETE FROM tasks WHERE task_id = %s AND project_id = %s", (task_id, project_id))
         conn.commit()
+        
+        if cursor.rowcount == 0:
+            abort(404)
             
         flash("Task deleted successfully.")
         

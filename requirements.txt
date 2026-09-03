@@ -1,4 +1,5 @@
 flask
-flask_session
 mysql-connector-python
 python-dotenv
+PyJWT
+requests
