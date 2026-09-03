@@ -5,6 +5,7 @@ edit-task
 {% endblock %}
 
 {% block content %}
+<div class="card">
 <h2>Edit Task {{task.title}}</h2>
 <form method="POST" action="{{ url_for('task.edit', project_id=project_id, task_id=task.task_id) }}">
     <label>Task Title</label><br>
@@ -29,6 +30,7 @@ edit-task
         value="{{ task.due_date.strftime('%Y-%m-%d') if task.due_date else '' }}"><br><br>
 
     <button type="submit">Save Changes</button>
-    <a href="{{ url_for('project.details', project_id=project_id) }}">Cancel</a>
+    <a class="btn btn-secondary" href="{{ url_for('project.details', project_id=project_id) }}">Cancel</a>
 </form>
+</div>
 {% endblock %}

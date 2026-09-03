@@ -5,11 +5,13 @@ edit
 {% endblock %}
 
 {% block content %}
+<div class="card">
 <h3>Edit Project: <u>{{ project.name }}</u></h3>
 <form action="{{ url_for('project.edit', project_id=project.project_id) }}" method='POST'>
     <label for="name">Project Name</label><br><br>
     <input type="text" name="name" id="name" value="{{ project.name }}" required><br><br>
     <input type="submit" name="submit" id="submit" value="Save"><br><br>
-    <a href="{{ url_for('project.details', project_id=project.project_id) }}">Back to Lists</a>
+    <a class="btn btn-secondary" href="{{ url_for('project.details', project_id=project.project_id) }}">Back to Lists</a>
 </form>
+</div>
 {% endblock %}

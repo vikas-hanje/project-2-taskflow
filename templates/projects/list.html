@@ -5,9 +5,11 @@ projects
 {% endblock %}
 
 {% block content %}
-<h3>My Projects</h3>
+<div class="page-header">
+    <h3>My Projects</h3>
+</div>
 
-<div>
+<div class="card">
     <h4>Create New Project</h4>
     <form action="{{url_for('project.index')}}" method="POST">
         <label for="project_name">Project Name</label>
@@ -19,21 +21,23 @@ projects
 <h4>Existing Projects</h4>
 
 {% if projects %}
-<ul>
+<ul class="item-list">
     {% for project in projects %}
-    <li>
-        <strong>{{project.name}}</strong>
-        <p>Created: {{project.created_at}}</p>
-        <a href="{{ url_for('project.details', project_id=project.project_id) }}">View Project</a>
-        <form action="{{ url_for('project.delete', project_id=project.project_id) }}" method="POST" onsubmit="return confirm('Are you sure about this, it is permanent!')">
-            <br><input type="submit" name="submit" id="submit" value="Delete">
-        </form>
-        <br>
-        <br>
+    <li class="card item-row">
+        <div class="item-info">
+            <strong>{{project.name}}</strong>
+            <p class="meta">Created: {{project.created_at}}</p>
+        </div>
+        <div class="item-actions">
+            <a class="btn btn-secondary" href="{{ url_for('project.details', project_id=project.project_id) }}">View Project</a>
+            <form action="{{ url_for('project.delete', project_id=project.project_id) }}" method="POST" onsubmit="return confirm('Are you sure about this, it is permanent!')">
+                <input class="btn-danger" type="submit" name="submit" id="submit" value="Delete">
+            </form>
+        </div>
     </li>
     {% endfor %}
 </ul>
 {% else %}
-<p><em>You have not yet created any project.</em></p>
+<p class="empty-state"><em>You have not yet created any project.</em></p>
 {% endif %}
 {% endblock %}
