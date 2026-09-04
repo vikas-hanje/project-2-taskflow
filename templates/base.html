@@ -37,9 +37,20 @@
     </main>
     <footer>
         <div id="footer">
-            <p>&copy; Copyright 2030 by Alien</p>
+            <p><i>&copy; Copyright 2026 by TaskFlow</i></p>
         </div>
     </footer>
+
+    <script>
+        // Auto-dismiss flash messages after a few seconds.
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                document.querySelectorAll('.flash-message').forEach(function (msg) {
+                    msg.remove();
+                });
+            }, 4000);
+        });
+    </script>
 </body>
 
 </html>
