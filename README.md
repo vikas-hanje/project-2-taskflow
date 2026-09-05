@@ -28,27 +28,39 @@ TaskFlow is a multi-user project and task manager. Users register an account, cr
 - config.py loads settings from environment variables
 - schema.sql defines the database schema
 
-## Setup
+## Getting Started
 
 Prerequisites: Python 3, a running MySQL server, and pip.
 
-1. Clone the repository and move into the project folder.
-2. Create and activate a virtual environment.
-3. Install dependencies with pip install -r requirements.txt
-4. Create the database by running schema.sql against MySQL. This creates the Taskflow_DB database and its tables.
-5. Create a .env file in the project root with the following variables:
+- Clone this repository to your local machine.
+- Create and activate a virtual environment:
 
-   - SECRETE_KEY, a secret key for signing Flask sessions
-   - JWT_SECRETE_KEY, a separate secret key for signing API tokens
-   - DB_host, the database host, usually localhost
-   - DB_user, the MySQL username
-   - DB_password, the MySQL password
-   - DB_database, set to Taskflow_DB
+        python -m venv env
+        source env/bin/activate 
 
-   This file is already listed in .gitignore and should never be committed.
+    On Windows use:
 
-6. Start the app with python app.py
-7. Visit http://127.0.0.1:5000 in a browser.
+        env\Scripts\activate
+
+- Install the required dependencies:
+
+        pip install -r requirements.txt
+
+- Create a .env file in the root directory and add the following variables.
+
+      SECRETE_KEY= # a secret key for signing Flask sessions
+      JWT_SECRETE_KEY= # a separate secret key for signing API tokens
+      DB_host= # the database host, usually localhost
+      DB_user= # the MySQL username
+      DB_password= # the MySQL password
+      DB_database= # set to Taskflow_DB
+
+- Set up your database by running the queries found in schema.sql.
+- Start the Flask server:
+
+        python app.py
+        
+- Open your browser and navigate to (http://127.0.0.1:5000).
 
 ## Using the API
 
@@ -67,7 +79,3 @@ Main endpoints:
 - GET /api/projects/project_id/tasks/task_id
 - PUT /api/projects/project_id/tasks/task_id
 - DELETE /api/projects/project_id/tasks/task_id
-
-## Notes
-
-This is a learning project, built to practice authentication, authorization, and REST API design on top of a plain Flask and MySQL stack without an ORM.
